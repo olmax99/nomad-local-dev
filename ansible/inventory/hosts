@@ -1,0 +1,23 @@
+server01.consul ansible_user=root ansible_python_interpreter=/usr/bin/python3 ansible_ssh_host=192.168.0.111
+server02.consul ansible_user=root ansible_python_interpreter=/usr/bin/python3 ansible_ssh_host=192.168.0.112
+
+[service_consul]
+server01.consul consul_node_role=bootstrap
+server02.consul consul_node_role=client
+
+[service_vault]
+server01.consul
+
+[service_nomad]
+server01.consul nomad_node_role=both
+server02.consul nomad_node_role=client
+
+[service_traefik]
+server01.consul
+
+# Deploy Nomad apps
+#[nomad_deployer]
+#server02.consul
+
+[nomad_instances]
+server01.consul

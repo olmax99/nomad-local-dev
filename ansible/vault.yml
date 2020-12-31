@@ -1,0 +1,7 @@
+---
+
+- hosts: vault_instances
+  become: true
+  become_user: root
+  roles:
+      - {role: brianshumate.vault, tags: ['vault']}

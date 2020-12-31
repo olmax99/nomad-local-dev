@@ -1,0 +1,13 @@
+---
+
+# VARIABLES TO EDIT
+consul_iface: eth1
+consul_datacenter: "lab"
+consul_acl_datacenter: "lab"
+consul_domain: "consul"
+consul_recursors: ['1.1.1.1', '8.8.8.8']
+# CONSTANTS
+consul_client_address: "0.0.0.0"
+consul_dnsmasq_enable: yes
+consul_acl_master_token_display: yes
+vault_azurekeyvault: no

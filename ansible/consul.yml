@@ -1,0 +1,8 @@
+---
+
+- hosts: service_consul
+  become: true
+  become_user: root
+  roles:
+      - {role: brianshumate.consul, tags: ['consul']}
+      

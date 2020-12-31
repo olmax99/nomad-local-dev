@@ -1,0 +1,8 @@
+---
+
+- hosts: service_nomad
+  become: true
+  become_user: root
+  roles:
+      - {role: geerlingguy.docker, tags: ['docker']}
+      - {role: brianshumate.nomad, tags: ['docker', 'nomad']}

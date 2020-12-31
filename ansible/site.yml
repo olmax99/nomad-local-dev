@@ -1,0 +1,6 @@
+---
+
+- import_playbook: consul.yml
+- import_playbook: vault.yml
+- import_playbook: nomad.yml
+- import_playbook: traefik.yml

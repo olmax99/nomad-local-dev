@@ -1,0 +1,9 @@
+---
+
+# VARIABLES TO EDIT
+vault_iface: eth1
+vault_datacenter: "lab"
+vault_domain: "consul"
+# CONSTANTS
+vault_ui: yes
+vault_cluster_disable: yes

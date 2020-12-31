@@ -1,0 +1,5 @@
+---
+
+# VARIABLES TO EDIT
+traefik_bind_ip: "192.168.0.111"
+traefik_consul_master: "consul.service.lab.consul"
