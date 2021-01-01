@@ -1,12 +1,20 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+$script = <<-SCRIPT
+echo "[-] Prepare node for external Ansible provisioning..."
+
+echo "[+] Add insecure_key to root..."
+mkdir /root/.ssh && sudo cp .ssh/authorized_keys /root/.ssh
+SCRIPT
+
 N = 2
 Vagrant.configure("2") do |config|
     (1..N).each do |i|
         config.vm.define "node-#{i}" do |node|
             node.vm.box = "generic/ubuntu1604"
             node.vm.hostname = "node-#{i}"
+            node.vm.provision "shell", inline: $script
             # Bridged network
             # node.vm.network "public_network", bridge: "en0: Wi-Fi (AirPort)", ip:"192.168.0.11#{i}"
             node.vm.network :private_network, ip: "192.168.0.11#{i}"

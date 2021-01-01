@@ -12,6 +12,9 @@ server01.consul
 server01.consul nomad_node_role=both
 server02.consul nomad_node_role=client
 
+[consul_instances:children]
+service_consul
+
 [service_traefik]
 server01.consul
 

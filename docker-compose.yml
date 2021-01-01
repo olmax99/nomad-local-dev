@@ -1,0 +1,16 @@
+version: '3.3'
+
+services:
+  controller:
+    container_name: "${ANSIBLE_DOCKER_NAME-ansible_controller}"
+    network_mode: host
+    build: ./controller
+    #network_mode: bridge
+    # ports:
+    #   - "4566:4566"
+    # environment:
+    #   - DEBUG=0
+    volumes:
+      - ./ansible:/root/ansible
+    # Keep container alive
+    command: tail -F keep-alive

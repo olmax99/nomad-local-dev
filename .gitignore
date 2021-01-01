@@ -183,4 +183,5 @@ tramp
 *.sublime-workspace
 #*.sublime-project
 
-
+insecure_key
+/*.vagrant
