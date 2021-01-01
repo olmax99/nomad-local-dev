@@ -3,4 +3,4 @@
 - src: griggheo.consul-template
 - src: brianshumate.vault
 - src: brianshumate.nomad
-- src: arillso.traefik
+- src: kibatic.traefik
