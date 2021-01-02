@@ -3,7 +3,9 @@ FROM alpine:latest
 # Install dependencies
 RUN apk update && \
     apk upgrade &&  \
-    apk add --no-cache --update ansible bash libffi-dev py-netaddr openssh sshpass zip python3 py3-pip
+    apk add --no-cache --update ansible bash libffi-dev py-netaddr openssh sshpass zip python3 py3-pip pass
+
+RUN python3 -m pip install keyring qpass
 
 WORKDIR /etc/ansible
 

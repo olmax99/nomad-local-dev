@@ -1,6 +1,6 @@
 ---
 
-- hosts: vault_instances
+- hosts: service_vault
   become: true
   become_user: root
   roles:
