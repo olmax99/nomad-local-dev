@@ -1,11 +1,18 @@
-FROM alpine:latest
+FROM debian:buster-slim
 
-# Install dependencies
-RUN apk update && \
-    apk upgrade &&  \
-    apk add --no-cache --update ansible bash libffi-dev py-netaddr openssh sshpass zip python3 py3-pip pass
 
-RUN python3 -m pip install keyring qpass
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
+    apt-get install -y python3-pip bash tree sshpass git openssh-client pass unzip && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
+    
+RUN pip3 install --upgrade pip cffi && \
+    pip install ansible==2.10.3 && \
+    pip install mitogen ansible-lint jmespath && \
+    pip install --upgrade pywinrm \
+    pip install netaddr \
+    pip install keyring \
+    pip install qpass
 
 WORKDIR /etc/ansible
 

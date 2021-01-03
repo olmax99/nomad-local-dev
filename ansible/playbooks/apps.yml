@@ -6,7 +6,7 @@
     block:
       - name: Copy Nomad Job
         copy:
-          src: /playbooks/apps/simpleserver.nomad
+          src: ./apps/simpleserver.nomad
           dest: /tmp/simpleserver.nomad
       - name: Run Nomad Job
         command: nomad job run /tmp/simpleserver.nomad

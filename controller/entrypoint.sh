@@ -16,4 +16,7 @@ else
   echo "[-] insecure_key is missing.."
 fi
 
+echo "[*] ready.."
+ansible --version
+
 exec "$@"

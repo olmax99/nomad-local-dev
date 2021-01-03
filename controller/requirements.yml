@@ -3,4 +3,8 @@
 - src: griggheo.consul-template
 - src: brianshumate.vault
 - src: brianshumate.nomad
-- src: kibatic.traefik
+# - src: kibatic.traefik
+#   from GitHub, overriding the name and specifying a specific tag
+- src: https://github.com/olmax99/ansible-traefik
+  version: master
+  name: olmax.traefik

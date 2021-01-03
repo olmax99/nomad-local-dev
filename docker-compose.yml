@@ -3,6 +3,7 @@ version: '3.3'
 services:
   controller:
     container_name: "${ANSIBLE_DOCKER_NAME-ansible_controller}"
+    hostname: ansible-controller
     network_mode: host
     build: ./controller
     #network_mode: bridge

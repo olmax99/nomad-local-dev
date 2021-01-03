@@ -1,5 +1,13 @@
 ---
 
-# VARIABLES TO EDIT
+traefik_install_dir: /usr/bin
+traefik_binary_url: https://github.com/containous/traefik/releases/download/v1.7.20/traefik_linux-amd64
+#traefik_bin_path: "{{ traefik_install_dir }}/traefik"
+traefik_config_file: /etc/traefik.toml
+traefik_template: traefik_v2.toml
+traefik_systemd_unit_template: traefik.service
+traefik_systemd_unit_dest: /etc/systemd/system/traefik.service
+
+# VARIABLES TO EDIT FOR CUSTOM templates/traefik_v2.toml.j2
 traefik_bind_ip: "192.168.0.111"
 traefik_consul_master: "consul.service.lab.consul"
