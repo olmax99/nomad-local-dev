@@ -1,9 +1,9 @@
 job "simple-server-[[.environment_slug]]" {
   datacenters = ["lab"]
   type = "service"
-  meta {
-    git_sha = "[[.git_sha]]"
-  }
+  # meta {
+  #   git_sha = "[[.git_sha]]"
+  # }
   group "simpleserver-[[.environment_slug]]" {
     count = 1
     restart {

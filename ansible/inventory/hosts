@@ -1,5 +1,5 @@
-server01.consul ansible_user=root ansible_python_interpreter=/usr/bin/python3 ansible_ssh_host=192.168.0.111
-server02.consul ansible_user=root ansible_python_interpreter=/usr/bin/python3 ansible_ssh_host=192.168.0.112
+server01.consul ansible_user=root ansible_python_interpreter=/usr/bin/python3 ansible_ssh_host=192.168.122.111
+server02.consul ansible_user=root ansible_python_interpreter=/usr/bin/python3 ansible_ssh_host=192.168.122.112
 
 [service_consul]
 server01.consul consul_node_role=bootstrap

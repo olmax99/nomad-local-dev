@@ -9,5 +9,5 @@ traefik_systemd_unit_template: traefik.service
 traefik_systemd_unit_dest: /etc/systemd/system/traefik.service
 
 # VARIABLES TO EDIT FOR CUSTOM templates/traefik_v2.toml.j2
-traefik_bind_ip: "192.168.0.111"
+traefik_bind_ip: "192.168.122.111"
 traefik_consul_master: "consul.service.lab.consul"

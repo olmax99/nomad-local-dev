@@ -3,62 +3,118 @@
 #+FILETAGS: :nomad:iac:ansible:vault:consul:vagrant
 
 Set up and manage a local Nomad Cluster using Consul, Vault, Traefik and Vagrant.
- 
+
 # #+CAPTION: project
 # #+attr_html: :width 200px
 # [[file:images/helm-plus-metabase.png][file:./images/*.png]]
 
+* Useful Commands
+#+begin_src bash
+$ vagrant up --provider=libvirt
+
+# Consul
+$ vagrant ssh node-1 -c "consul catalog nodes"
+$ vagrant ssh node-1 -c "consul catalog services -node=node-1 -tags"
+# Vault
+$ curl http://192.168.0.111:8200/v1/sys/health | python -m json.tool   # Check Vault 'unsealed'
+$ vault kv put secret/aws/s3 aws_access_key_id=somekeyid               # Create new secret
+$ curl -X PUT -H "Content-Type: application/json" -d '{"key":"****"}' \ 
+ "http://192.168.0.111:8200/v1/sys/unseal"                             # Unseal
+# Nomad
+$ vagrant ssh node-1 -c "nomad server members -detailed"
+$ vagrant ssh node-1 -c "nomad node-status"
+$ vagrant ssh node-1 -c "nomad job run <path/to/jobspec.nomad>"
+$ vagrant ssh node-1 -c "nomad deployment list"
+$ vagrant ssh node-1 -c "nomad job status <Job_ID>"
+$ vagrant ssh node-1 -c "nomad job stop <Job_ID>"
+
+$ docker exec -i -t ansible_controller bash
+$ rsync -avz -e "ssh -i $HOME/.vagrant.d/insecure_private_key" \ 
+ example/ root@192.168.0.111:/root/example
+#+end_src
+
 * Get Started
-
-** Environment Setup
-
+- When being launched the =entrypoint= will pull all =ansible-galaxy= roles as
+  defined in the =ansible/requirements.yml= file.
+** 1. Environment Setup
 | # | Action               | Command     |
-| --| ----                 | ----------- |
-| 1 | Clone the repository | `host:~/ ❯ git clone https://github.com/marco-lancini/offensive-infrastructure.git` |
-| 2 | Get to the hashistack folder | `host:~/ ❯ cd offensive-infrastructure/hashistack/part_2_hashistack/` |
-| 3 | Edit `Vagrantfile` and change the IP addresses accordingly with your own local network | |
-| 4 | Spin up Vagrant machines | `host:~/hashistack ❯ vagrant up` |
-| 5 | Build the container for the Ansible worker | `host:~/hashistack ❯ docker build -t ansibleworker:1.0 ansible/` |
-| 6 | Run the container while sharing the relevant folders | `host:~/hashistack ❯ docker run -ti --rm -v $(pwd)/ansible:/etc/ansible -v $(pwd)/playbooks:/playbooks ansibleworker:1.0` |
-| 7 | Pull the ansible roles | `/playbooks $ ansible-galaxy install --roles-path /etc/ansible/roles -r /etc/ansible/requirements.yml` |
+| 1 | Clone the repository | =host:~/ ❯ git clone <nomad-cluster>= |
+| 2 | Edit =Vagrantfile= and change the IP addresses accordingly with your own local network | Also ensure match with =ansible/inventory/group_vars/service_traefik/traefik.yml= |
+| 3 | Spin up Vagrant machines | =host:<nomad-cluster> ❯ vagrant up --provider=libvirt= |
+| 4 | Build the container for the Ansible controller | =host:<nomad-cluster> ❯ docker-compose up --build= |
+| 5 | Access Ansible Controller | =host:<nomad-cluster> ❯ docker exec -i -t ansible_controller bash= |
+| 6 | Create siimlink to ansible-vault script | =$ ln -s ./ansible/scripts/vault-pass-client.py vault-pass-client.py= |
 
-** Stack Deployment
-
+** 2. Stack Deployment
 | # | Action               | Command     |
-| --| ----                 | ----------- |
-| 1 | Change the IP addresses of the `hosts` file accordingly with what you set in the `Vagrantfile` | `/playbooks $ cat /playbooks/inventory/hosts` |
-| 2 | Edit the HashiStack playbook and ensure the variables match your setup | `/playbooks $ cat /playbooks/hashistack.yml` |
-| 3 | Run the playbook a first time (use any password as Vault password) to deploy Consul+Dnsmasq, Vault, Nomad+Docker, Traefik | `/playbooks $ ansible-playbook hashistack.yml` |
+| 1 | Change the IP addresses of the =hosts= file accordingly with what you set in the =Vagrantfile= | =$ cat /ansible/inventory/hosts= |
+| 3 | Run the individual playbooks a first time (use any password as Vault password) to deploy Consul+Dnsmasq, and Vault | =(ansible_controller) ~$ ansible-playbook ansible/consul.yml + vault.yml= |
 | 4 | Unseal Vault: head to http://192.168.0.111:8200/ and follow the process (remember to store the master key and the root token) | http://192.168.0.111:8200/ |
-| 5 | Provide a Vault token to Nomad (remember to store the new password) | `/playbooks $ ansible-vault create /playbooks/inventory/group_vars/docker_instances` <br> `New Vault password:` <br> `Confirm New Vault password:` <br><br> `---` <br> `nomad_vault_token: <Vault Root Token>` |
-| 6 | Run the playbook a second time to configure Nomad with the Vault token | `/playbooks $ ansible-playbook hashistack.yml` |
-| 7 | Restart the services in order (and then unseal Vault) | `/playbooks $ ansible-playbook restart.yml` |
+| 5 | Provide a Vault token to Nomad (remember to store the new password) | In 'General Instructions' follow the 'Integrate Ansible-Vault' section and insert encrypted token into =ansible/inventory/group_vars/service_nomad.yml= |
+| 6 | Run the playbook a second time to configure Nomad with the Vault token | =ansible-playbook --vault-id dev@vault-pass-client.py ansible/site.yml= |
 
-
-** Main IP Addresses
-
+*** Main IP Addresses
 | Service  | IP                        | Hostname     |
-| -------- | ---------------           | ------------ |
 | Consul   | http://192.168.0.111:8500 | http://consul.service.lab.consul:8500 |
 | Vault    | http://192.168.0.111:8200 | http://active.vault.service.lab.consul:8200 |
 | Nomad    | http://192.168.0.111:4646 | http://nomad-servers.service.lab.consul:4646 |
 | Traefik  | http://192.168.0.111:8081 | |
 
-
 ** New Applications Deployment
-
 | # | Action               | Command     |
-| --| ----                 | ----------- |
-| 1 | Create a Nomad job description | `playbooks/apps/APPNAME.nomad` |
-| 2 | Add a new task in the `playbooks/apps.yml` playbook following the example | `playbooks/apps.yml` |
-| 3 | Run the apps playbook | `/playbooks $ ansible-playbook apps.yml` |
+| 1 | Find the Nomad job description | =/home/vagrant/example/APPNAME.nomad= |
+| 2 | Inside the Nomad server run the =levant= deployment script | =(vagrant@node-1):~/example$ bash ./deploy-dev.sh= |
 
 
 ** Environment teardown
-
 | # | Action               | Command     |
-| --| ----                 | ----------- |
-| 1 | Destroy the Vagrant machines | `host:~/hashistack ❯ vagrant destroy` |
+| 1 | Stop the Vagrant machines    | =host:<nomad-cluster> ❯ vagrant halt/destroy= |
+
+* General Instructions
+** Integrate Ansible-Vault
+- The variable =nomad_vault_token= needs to be created via =Ansible-Vault= 
+- In the Ansible-Controller set up =gpg= and =pass=
+#+begin_src bash
+# 'pass' needs a pregenerated 'gpg' key
+(ansible_controller)~$ gpg --list-key       # will be empty
+(ansible_controller)~$ gpg --full-generate-key   # the key will have a full name
+
+# Create password-store and ansible-vault encryption password
+(ansible_controller)~$ pass init "<gpg_full_key_name>"
+(ansible_controller)~$ pass insert dev   # 'dev' is the vault-id label
+
+# Create inline secret to be used with ansible-vault
+# Ensure keyname 'dev' matches in ansible.cfg and ansible/script/pass-keyring-client.py l.131 !!
+# 130 if not keyname:
+# 131        keyname = "dev"  <-- HERE
+$ ansible-vault encrypt_string --vault-id dev@vault-pass-client.py '[VAULT_ROOT_TOKEN]' --name 'nomad_vault_token'
+#+end_src
+
+#+begin_src bash
+(ansible_controller)~$ ansible-playbook --vault-id dev@ansible/scripts/vault-pass-client.py ansible/nomad.yml
+(ansible_controller)~$ ansible-playbook --vault-id dev@prompt ansible/nomad.yml
+# Confirm Nomad
+http://192.168.0.111:4646
+#+end_src
+
+** Troubleshoot Vagrant
+- *Error while activating network: Call to virNetworkCreate failed: internal*
+  *error: Network is already in use*
+  #+begin_src bash
+# This is a libvirt/KVM network problem
+
+# 1. Identify default interface
+$ sudo virsh net-list
+$ sudo virsh net-dumpxml vagrant-libvirt
+$ sudo virsh net-edit vagrant-libvirt
+
+# 2. Delete Interface and vagrant virtual network manually
+# You can also check libvirt networks in VMM > Edit > Connection Details > Virtual Networks
+$ sudo virsh net-destroy vagrant-libvirt
+  #+end_src
+  
+
+
 
 * Author
 
